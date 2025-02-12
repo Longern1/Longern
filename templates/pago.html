@@ -1,0 +1,119 @@
+
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Longern - Artful Expressions</title>
+    <link rel="stylesheet" href="/static/css/pago.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tinos:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <link rel="icon" href="/static/Img/6B930769-72F7-463F-96DC-ADA2DC59E605_3-removebg-preview.png">
+
+</head>
+<body>
+
+    <header>
+        <div class="navbar">
+
+            <button class="menu-button" onclick="toggleMenu()">
+                <span class="line line1"></span>
+                <span class="line line2"></span>
+            </button>
+
+            <nav class="menu" id="menu">
+                <ul>
+
+                    <li><a href="{{ url_for('index') }}">Inicio</a></li>
+
+                    <li><a href="{{ url_for('camisetas') }}">Camisetas</a></li>
+                </ul>
+            </nav>
+            
+
+            <a href="{{ url_for('index') }}" class="brand-name">
+                <h1>LONGERN</h1>
+            </a>
+            <a class="texto" href="{{ url_for('track_order') }}">
+                <button class="button">
+    
+      
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"></path>
+                    </svg>
+                  
+                    
+                    <div class="text">
+                      Rastear Pedido
+                    </div>
+    
+                  </button>
+                </a>
+    
+
+            <div class="right-menu">
+                
+                <a href="#" class="cart-icon" id="cart-icon">
+                    <img src="/static/Img/shopping-cart_11614817-33-_arrastrado_-removebg-preview.png" alt="Carrito" id="cart-icon-img">
+                </a>
+                <div id="cart-dropdown" class="cart-dropdown">
+                    <ul id="cart-items">
+
+                    </ul>
+                    <button id="clear-cart" class="clear-cart-btn" onclick="clearCart()">Eliminar todos los productos</button>
+                    <button id="checkout" class="checkout-btn" onclick="checkout()">Finalizar compra</button>
+
+                </div>
+                
+                
+    </header>
+    <form id="payment-form">
+        <h2>Detalles del Carrito</h2>
+        <ul id="cart-summary">
+
+        </ul>
+
+        <h2>Datos de Envío</h2>
+
+        <div class="input-wrapper">
+            <input type="text" id="full-name" name="full-name" placeholder=" " required>
+            <label for="full-name">Nombre Completo:</label>
+        </div>
+        
+        <div class="input-wrapper">
+            <input type="text" id="cedula" name="cedula" placeholder=" " required>
+            <label for="cedula">Cédula:</label>
+        </div>
+        
+        <div class="input-wrapper">
+            <input type="text" id="city" name="city" placeholder=" " required>
+            <label for="city">Ciudad:</label>
+        </div>
+        
+        <div class="input-wrapper">
+            <input type="text" id="address" name="address" placeholder=" " required>
+            <label for="address">Dirección:</label>
+        </div>
+        
+        <h2>Método de Pago</h2>
+        
+        <div class="input-wrapper">
+            <select id="payment-method" name="payment-method" required>
+                <option value="" disabled selected>Selecciona un método de pago</option>
+                <option value="credit-card">Tarjeta de Crédito</option>
+                <option value="debit-card">Tarjeta Débito</option>
+                <option value="paypal">PayPal</option>
+                <option value="cash-on-delivery">Pago Contra Entrega</option>
+            </select>
+            <label for="payment-method">Método de Pago</label>
+        </div>
+        
+        <button class="confirmar" type="submit">Confirmar Pago</button>
+        
+    </form>
+  
+
+    <script src="/static/JS/pago.js"></script>
+</body>
+</html>
+

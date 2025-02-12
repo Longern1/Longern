@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/static/Img/6B930769-72F7-463F-96DC-ADA2DC59E605_3-removebg-preview.png">
+    <link rel="stylesheet" href="/static/css/principal.css">
+    <link rel="stylesheet" href="/static/css/order.css">
+    <link rel="stylesheet" href="/static/css/track.css">
+    
+    <title>Detalles del Pedido</title>
+</head>
+<body>
+
+    <header>
+        <div class="navbar">
+            <button class="menu-button" onclick="toggleMenu()">
+                <span class="line line1"></span>
+                <span class="line line2"></span>
+            </button>
+            <nav class="menu" id="menu">
+                <ul>
+                    <li><a href="{{ url_for('index') }}">Inicio</a></li>
+                    <li><a href="{{ url_for('camisetas') }}">Camisetas</a></li>
+                </ul>
+            </nav>
+            <a href="{{ url_for('index') }}" class="brand-name">
+                <h1>LONGERN</h1>
+            </a>
+            <a class="texto" href="{{ url_for('track_order') }}">
+            <button class="button">
+
+  
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"></path>
+                </svg>
+              
+                
+                <div class="text">
+                  Rastear Pedido
+                </div>
+
+              </button>
+            </a>
+            <div class="right-menu">
+             
+                <a href="#" class="cart-icon" id="cart-icon">
+                    <img src="/static/Img/shopping-cart_11614817-33-_arrastrado_-removebg-preview.png" alt="Carrito" id="cart-icon-img">
+                </a>
+                <div id="cart-dropdown" class="cart-dropdown">
+                    <ul id="cart-items"></ul>
+                    <button id="clear-cart" class="clear-cart-btn" onclick="clearCart()">Eliminar todos los productos</button>
+                    <button id="checkout" class="checkout-btn" onclick="checkout()">Finalizar compra</button>
+                </div>
+            </div>
+        </div>
+    </header>
+    <div class="form-container">
+        <h2>Rastreo de Pedido</h2>
+        <form method="POST">
+            <label for="order_code">Ingrese el Código de Pedido:</label>
+            <input type="text" id="order_code" name="order_code" required>
+            
+            <button class="animated-button">
+                <span class="span-mother">
+                    <span>E</span>
+                    <span>N</span>
+                    <span>V</span>
+                    <span>I</span>
+                    <span>O</span>
+                    <span>S</span>
+                </span>
+                <span class="span-mother2">
+                    <span>E</span>
+                    <span>N</span>
+                    <span>V</span>
+                    <span>I</span>
+                    <span>O</span>
+                    <span>S</span>
+                </span>
+            </button>
+            
+        </form>
+        {% if error %}
+            <p style="color: red;">{{ error }}</p>
+        {% endif %}
+    </div>
+</body>
+<script src="/static/JS/principal.js"></script>
+</html>

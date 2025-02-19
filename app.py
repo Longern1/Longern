@@ -1,116 +1,116 @@
-from flask import Flask, request, jsonify, render_template, redirect, url_for
-import psycopg2
-import random  
-import string  
+import os
+import random
+import string
+from flask import Flask, request, jsonify, render_template
+from flask_sqlalchemy import SQLAlchemy
+from dotenv import load_dotenv
+
+# Cargar variables de entorno
+load_dotenv()
 
 app = Flask(__name__)
 
 # Configuración de la base de datos
-db_config = {
-    'host': 'dpg-cum1hb5umphs738ba2n0-a',
-    'user': 'longern_user',
-    'password': 'fcW5rRgFTfKw5ve3Qe5ZyrJIFJpRCE2Q',
-    'database': 'longern',
-    'port': '5432'  # Puerto por defecto de PostgreSQL
-}
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# Inicializar la base de datos
+db = SQLAlchemy(app)
 
+# Modelo de Usuarios
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
 
-# Función para obtener conexión a la base de datos
-def get_db_connection():
-    return psycopg2.connect(
-        host=db_config['host'],
-        database=db_config['database'],
-        user=db_config['user'],
-        password=db_config['password'],
-        port=db_config['port']
-    )
+# Modelo de Pagos
+class Payment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    full_name = db.Column(db.String(200), nullable=False)
+    cedula = db.Column(db.String(20), nullable=False)
+    city = db.Column(db.String(100), nullable=False)
+    address = db.Column(db.String(255), nullable=False)
+    payment_method = db.Column(db.String(50), nullable=False)
+    cart_details = db.Column(db.Text, nullable=False)
+    order_code = db.Column(db.String(20), unique=True, nullable=False)
+    order_status = db.Column(db.String(50), default='En preparación')
 
-@app.route('/')
-def index():
-    return render_template('Longern.html')  
+# Crear las tablas en la BD
+with app.app_context():
+    db.create_all()
 
-@app.route('/camisetas')
-def camisetas():
-    return render_template('Camisetas.html')  
+print("Base de datos conectada y tablas creadas.")
 
-@app.route('/pago')
-def pago():
-    return render_template('pago.html')  
-
+# Función para generar código de pedido aleatorio
 def generate_order_code(length=10):
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=length))
 
+# Rutas de la aplicación
+@app.route('/')
+def index():
+    return render_template('Longern.html')
+
+@app.route('/camisetas')
+def camisetas():
+    return render_template('Camisetas.html')
+
+@app.route('/pago')
+def pago():
+    return render_template('pago.html')
+
+# Procesar el pago y guardar pedido en la base de datos
 @app.route('/process-payment', methods=['POST'])
 def process_payment():
     data = request.get_json()
-    full_name = data.get('fullName')
-    cedula = data.get('cedula')
-    city = data.get('city')
-    address = data.get('address')
-    payment_method = data.get('paymentMethod')
-    cart = data.get('cart')
-
     order_code = generate_order_code()
 
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute('''
-            UPDATE payments SET order_code = %s, order_status = 'En preparación' 
-            WHERE full_name = %s AND cedula = %s
-        ''', (order_code, full_name, cedula))
-        
-        if cursor.rowcount == 0:  
-            cursor.execute('''
-                INSERT INTO payments (full_name, cedula, city, address, payment_method, cart_details, order_code)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-            ''', (full_name, cedula, city, address, payment_method, str(cart), order_code))
-        
-        conn.commit()
+        existing_payment = Payment.query.filter_by(full_name=data['fullName'], cedula=data['cedula']).first()
+
+        if existing_payment:
+            existing_payment.order_code = order_code
+            existing_payment.order_status = "En preparación"
+        else:
+            new_payment = Payment(
+                full_name=data['fullName'],
+                cedula=data['cedula'],
+                city=data['city'],
+                address=data['address'],
+                payment_method=data['paymentMethod'],
+                cart_details=str(data['cart']),
+                order_code=order_code
+            )
+            db.session.add(new_payment)
+
+        db.session.commit()
         return jsonify({'status': 'success', 'order_code': order_code}), 200
     except Exception as e:
+        db.session.rollback()
         return jsonify({'status': 'error', 'message': str(e)}), 500
-    finally:
-        cursor.close()
-        conn.close()
 
+# Consultar detalles de un pedido por código
 @app.route('/order-details/<order_code>', methods=['GET'])
 def order_details(order_code):
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM payments WHERE order_code = %s', (order_code,))
-        order = cursor.fetchone()
-        
+        order = Payment.query.filter_by(order_code=order_code).first()
+
         if not order:
             return "Código de pedido no encontrado.", 404
-        
+
         return render_template('order_details.html', order=order)
     except Exception as e:
         return f"Error: {str(e)}", 500
-    finally:
-        cursor.close()
-        conn.close()
 
+# Rastrear pedido ingresando el código
 @app.route('/track-order', methods=['GET', 'POST'])
 def track_order():
     if request.method == 'POST':
         order_code = request.form.get('order_code')
-        try:
-            conn = get_db_connection()
-            cursor = conn.cursor()
-            cursor.execute('SELECT * FROM payments WHERE order_code = %s', (order_code,))
-            order = cursor.fetchone()
-            
-            if not order:
-                return render_template('track_order.html', error="Código no encontrado.")
-            return render_template('order_details.html', order=order)
-        except Exception as e:
-            return f"Error: {str(e)}", 500
-        finally:
-            cursor.close()
-            conn.close()
+        order = Payment.query.filter_by(order_code=order_code).first()
+
+        if not order:
+            return render_template('track_order.html', error="Código no encontrado.")
+        return render_template('order_details.html', order=order)
+
     return render_template('track_order.html')
 
 if __name__ == '__main__':

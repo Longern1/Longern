@@ -10,17 +10,29 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# Configuración de la base de datos
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# Configuración de la base de datos en Render
+DB_USER = "longern_user"
+DB_PASSWORD = "tu_contraseña"  # Copia la contraseña de la imagen
+DB_HOST = "dpg-cum1hb5umphs738ba2n0-a"
+DB_NAME = "longern"
+DB_PORT = "5432"
 
-# Inicializar la base de datos
+app.config["SQLALCHEMY_DATABASE_URI"] = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
 db = SQLAlchemy(app)
 
 # Modelo de Usuarios
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
+@app.route('/test-db')
+def test_db():
+    try:
+        db.session.execute("SELECT 1")
+        return "Conexión exitosa a PostgreSQL en Render"
+    except Exception as e:
+        return f"Error conectando a PostgreSQL: {str(e)}"
 
 # Modelo de Pagos
 class Payment(db.Model):

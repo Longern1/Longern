@@ -12,7 +12,7 @@ app = Flask(__name__)
 
 # Configuración de la base de datos en Render
 DB_USER = "longern_user"
-DB_PASSWORD = "tu_contraseña"  # Copia la contraseña de la imagen
+DB_PASSWORD = "fcW5rRgFTfKw5ve3Qe5ZyrJIFJpRCE2Q"  # Copia la contraseña de la imagen
 DB_HOST = "dpg-cum1hb5umphs738ba2n0-a"
 DB_NAME = "longern"
 DB_PORT = "5432"
